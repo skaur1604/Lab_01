@@ -1,35 +1,53 @@
-import { employeeData } from "../data/employees"
+type Props = {
 
-export function EmployeeList() {
-  const groupedEmployees = employeeData.reduce<Record<string, typeof employeeData>>(
-    (groups, emp) => {
-      if (!groups[emp.department]) {
-        groups[emp.department] = []
-      }
-      groups[emp.department].push(emp)
-      return groups
-    },
-    {}
-  )
+  employees: {
 
-  return (
-    <main>
-      {Object.keys(groupedEmployees).map(dept => (
-        <section key={dept}>
-          <h2>{dept}</h2>
+    firstName: string
 
-          <table>
-            <tbody>
-              {groupedEmployees[dept].map((emp, index) => (
-                <tr key={index}>
-                  <td>{emp.firstName}</td>
-                  <td>{emp.lastName}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </section>
-      ))}
-    </main>
-  )
+    lastName: string
+
+    department: string
+
+  }[]
+
 }
+ 
+export function EmployeeList({ employees }: Props) {
+
+  const departments = Array.from(
+
+    new Set(employees.map(emp => emp.department))
+
+  )
+ 
+  return (
+<main>
+
+      {departments.map(dept => (
+<section key={dept}>
+<h2>{dept} team</h2>
+ 
+          <ul>
+
+            {employees
+
+              .filter(emp => emp.department === dept)
+
+              .map((emp, index) => (
+<li key={index}>
+
+                  {emp.firstName} {emp.lastName}
+</li>
+
+              ))}
+</ul>
+</section>
+
+      ))}
+</main>
+
+  )
+
+}
+
+ 
