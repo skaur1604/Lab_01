@@ -1,21 +1,32 @@
 import { useState } from "react"
+import { Routes, Route, Navigate } from "react-router-dom"
 import { Header } from "./components/Header"
-import { EmployeeList } from "./components/EmployeeList"
 import { Footer } from "./components/Footer"
-import { EmployeeForm } from "./components/EmployeeForm"
-import { employeeData } from "./data/employees"
- 
+import { NavBar } from "./components/NavBar"
+import { EmployeesPage } from "./pages/EmployeesPage"
+import { OrganizationPage } from "./pages/OrganizationPage"
+import { employees } from "./data/employees"
+
 function App() {
-  const [employees, setEmployees] = useState(employeeData)
- 
+  const [employeeList] = useState(employees)
+
   return (
-<>
-<Header />
-<EmployeeList employees={employees} />
-<EmployeeForm employees={employees} setEmployees={setEmployees} />
-<Footer />
-</>
+    <>
+      <Header />
+      <NavBar />
+
+      <Routes>
+        <Route path="/" element={<Navigate to="/employees" />} />
+        <Route
+          path="/employees"
+          element={<EmployeesPage employees={employeeList} />}
+        />
+        <Route path="/organization" element={<OrganizationPage />} />
+      </Routes>
+
+      <Footer />
+    </>
   )
 }
- 
+
 export default App

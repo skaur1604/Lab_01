@@ -1,106 +1,57 @@
 import { useState } from "react"
 
 export function EmployeeForm({ employees, setEmployees }: any) {
+  const [firstName, setFirstName] = useState("")
+  const [lastName, setLastName] = useState("")
+  const [department, setDepartment] = useState("")
 
-	const [firstName, setFirstName] = useState("")
+  function handleSubmit(e: any) {
+    e.preventDefault()
 
-	const [lastName, setLastName] = useState("")
+    if (firstName.trim().length < 3) return
+    if (!department) return
 
-	const [department, setDepartment] = useState("")
+    setEmployees([
+      ...employees,
+      { firstName, lastName, department }
+    ])
 
-	const [error, setError] = useState("")
+    setFirstName("")
+    setLastName("")
+    setDepartment("")
+  }
 
-	const departments = [...new Set(employees.map((e: any) => e.department))]
+  return (
+    <form onSubmit={handleSubmit}>
+      <h3>Add New Employee</h3>
 
-	function handleSubmit(e: any) {
+      <input
+        placeholder="First Name"
+        value={firstName}
+        onChange={e => setFirstName(e.target.value)}
+      />
 
-		e.preventDefault()
+      <input
+        placeholder="Last Name"
+        value={lastName}
+        onChange={e => setLastName(e.target.value)}
+      />
 
-		setError("")
+      <select
+        value={department}
+        onChange={e => setDepartment(e.target.value)}
+      >
+        <option value="">Select Department</option>
+        {[...new Set(employees.map((e: any) => e.department))].map(
+          (dept: string) => (
+            <option key={dept} value={dept}>
+              {dept}
+            </option>
+          )
+        )}
+      </select>
 
-		if (firstName.trim().length < 3) {
-
-			setError("First name should have at least 3 letters")
-
-			return
-
-		}
-
-		if (!department) {
-
-			setError("Please choose a department")
-
-			return
-
-		}
-
-		setEmployees([
-
-			...employees,
-
-			{ firstName, lastName, department }
-
-		])
-
-		setFirstName("")
-
-		setLastName("")
-
-		setDepartment("")
-
-	}
-
-	return (
-		<form onSubmit={handleSubmit}>
-			<h3>Add employee</h3>
-
-			{error && <p style={{ color: "red" }}>{error}</p>}
-
-			<input
-
-				type="text"
-
-				placeholder="First name"
-
-				value={firstName}
-
-				onChange={e => setFirstName(e.target.value)}
-
-			/>
-
-			<input
-
-				type="text"
-
-				placeholder="Last name"
-
-				value={lastName}
-
-				onChange={e => setLastName(e.target.value)}
-
-			/>
-
-			<select
-
-				value={department}
-
-				onChange={e => setDepartment(e.target.value)}
-			>
-				<option value="">Choose department</option>
-
-				{departments.map((dept: string) => (
-					<option key={dept} value={dept}>
-
-						{dept}
-					</option>
-
-				))}
-			</select>
-
-			<button type="submit">Add employee</button>
-		</form>
-
-	)
-
+      <button type="submit">Add Employee</button>
+    </form>
+  )
 }
-
