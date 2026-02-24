@@ -1,14 +1,16 @@
 import { useState } from "react"
 import { Routes, Route, Navigate } from "react-router-dom"
+import { employeeRepo } from "./repositories/employeeRepo"
+import { EmployeesPage } from "./pages/EmployeesPage"
+import { OrganizationPage } from "./pages/OrganizationPage"
 import { Header } from "./components/Header"
 import { Footer } from "./components/Footer"
 import { NavBar } from "./components/NavBar"
-import { EmployeesPage } from "./pages/EmployeesPage"
-import { OrganizationPage } from "./pages/OrganizationPage"
-import { employees } from "./data/employees"
 
 function App() {
-  const [employeeList] = useState(employees)
+  const [employeeList, setEmployeeList] = useState(
+    employeeRepo.getEmployees()
+  )
 
   return (
     <>
@@ -17,11 +19,22 @@ function App() {
 
       <Routes>
         <Route path="/" element={<Navigate to="/employees" />} />
+        
         <Route
           path="/employees"
-          element={<EmployeesPage employees={employeeList} />}
+          element={
+            <EmployeesPage
+              employees={employeeList}
+              setEmployees={setEmployeeList}
+            />
+          }
         />
-        <Route path="/organization" element={<OrganizationPage />} />
+
+        
+        <Route
+          path="/organization"
+          element={<OrganizationPage />}
+        />
       </Routes>
 
       <Footer />

@@ -1,54 +1,70 @@
 import { useState } from "react"
+import { useFormInput } from "../hooks/useFormInput"
+import { employeeService } from "../services/employeeService"
+import { employeeRepo } from "../repositories/employeeRepo"
 
-export function EmployeeForm({ employees, setEmployees }: any) {
-  const [firstName, setFirstName] = useState("")
-  const [lastName, setLastName] = useState("")
-  const [department, setDepartment] = useState("")
+type Props = {
+  setEmployees: (employees: any[]) => void
+}
 
-  function handleSubmit(e: any) {
+export function EmployeeForm({ setEmployees }: Props) {
+  const firstName = useFormInput("")
+  const lastName = useFormInput("")
+  const department = useFormInput("")
+  const [formError, setFormError] = useState("")
+
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    setFormError("")
 
-    if (firstName.trim().length < 3) return
-    if (!department) return
+    const result = employeeService.createEmployee({
+      firstName: firstName.value,
+      lastName: lastName.value,
+      department: department.value
+    })
 
-    setEmployees([
-      ...employees,
-      { firstName, lastName, department }
-    ])
+    if (!result.success) {
+      setFormError(result.message)
+      return
+    }
 
-    setFirstName("")
-    setLastName("")
-    setDepartment("")
+    setEmployees(result.employees)
+
+    firstName.setValue("")
+    lastName.setValue("")
+    department.setValue("")
   }
 
   return (
     <form onSubmit={handleSubmit}>
-      <h3>Add New Employee</h3>
+      <h3>Add Employee</h3>
+
+      {formError && <p style={{ color: "red" }}>{formError}</p>}
 
       <input
+        type="text"
         placeholder="First Name"
-        value={firstName}
-        onChange={e => setFirstName(e.target.value)}
+        value={firstName.value}
+        onChange={firstName.onChange}
       />
 
       <input
+        type="text"
         placeholder="Last Name"
-        value={lastName}
-        onChange={e => setLastName(e.target.value)}
+        value={lastName.value}
+        onChange={lastName.onChange}
       />
 
       <select
-        value={department}
-        onChange={e => setDepartment(e.target.value)}
+        value={department.value}
+        onChange={department.onChange}
       >
         <option value="">Select Department</option>
-        {[...new Set(employees.map((e: any) => e.department))].map(
-          (dept: string) => (
-            <option key={dept} value={dept}>
-              {dept}
-            </option>
-          )
-        )}
+        {employeeRepo.getDepartments().map(dep => (
+          <option key={dep} value={dep}>
+            {dep}
+          </option>
+        ))}
       </select>
 
       <button type="submit">Add Employee</button>
