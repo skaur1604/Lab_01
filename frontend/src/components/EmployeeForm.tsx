@@ -1,7 +1,6 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useFormInput } from "../hooks/useFormInput"
-import { employeeService } from "../services/employeeService"
-import { employeeRepo } from "../repositories/employeeRepo"
+import { employeeRepository } from "../repositories/employeeRepository"
 
 type Props = {
   setEmployees: (employees: any[]) => void
@@ -12,27 +11,31 @@ export function EmployeeForm({ setEmployees }: Props) {
   const lastName = useFormInput("")
   const department = useFormInput("")
   const [formError, setFormError] = useState("")
+  const [departments, setDepartments] = useState<string[]>([])
 
-  function handleSubmit(e: React.FormEvent) {
+  useEffect(() => {
+    employeeRepository.getDepartments().then(setDepartments)
+  }, [])
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setFormError("")
 
-    const result = employeeService.createEmployee({
-      firstName: firstName.value,
-      lastName: lastName.value,
-      department: department.value
-    })
+    try {
+      const employees = await employeeRepository.createEmployee({
+        firstName: firstName.value,
+        lastName: lastName.value,
+        department: department.value
+      })
 
-    if (!result.success) {
-      setFormError(result.message)
-      return
+      setEmployees(employees)
+
+      firstName.setValue("")
+      lastName.setValue("")
+      department.setValue("")
+    } catch (error: any) {
+      setFormError(error.message)
     }
-
-    setEmployees(result.employees)
-
-    firstName.setValue("")
-    lastName.setValue("")
-    department.setValue("")
   }
 
   return (
@@ -60,7 +63,7 @@ export function EmployeeForm({ setEmployees }: Props) {
         onChange={department.onChange}
       >
         <option value="">Select Department</option>
-        {employeeRepo.getDepartments().map(dep => (
+        {departments.map(dep => (
           <option key={dep} value={dep}>
             {dep}
           </option>
