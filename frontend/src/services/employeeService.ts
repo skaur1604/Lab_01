@@ -1,4 +1,4 @@
-import { employeeRepo } from "../repositories/employeeRepo"
+import { employeeRepo } from "../repositories/employeeRepository"
 
 export const employeeService = {
   createEmployee(data: {
