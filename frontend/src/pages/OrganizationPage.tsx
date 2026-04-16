@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { organizationRepo } from "../repositories/organizationRepo"
+import { organizationRepo } from "../repositories/organizationRepository"
 import { OrganizationForm } from "../components/OrganizationForm"
 
 export function OrganizationPage() {
