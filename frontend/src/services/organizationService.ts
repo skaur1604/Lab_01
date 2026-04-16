@@ -1,4 +1,4 @@
-import { organizationRepo } from "../repositories/organizationRepo"
+import { organizationRepo } from "../repositories/organizationRepository"
 
 export const organizationService = {
   createRole(data: {
