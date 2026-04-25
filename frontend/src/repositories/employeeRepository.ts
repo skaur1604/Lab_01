@@ -1,7 +1,7 @@
 export const employeeRepository = {
-  async getEmployees() {
-    const res = await fetch("http://localhost:3000/api/employees")
-    return res.json()
+  async getEmployees(page = 1, limit = 3) {
+  const res = await fetch(`http://localhost:3000/api/employees?page=${page}&limit=${limit}`)
+  return res.json()
   },
 
   async getDepartments() {

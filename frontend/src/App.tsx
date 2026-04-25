@@ -5,13 +5,13 @@ import { EmployeesPage } from "./pages/EmployeesPage"
 import { OrganizationPage } from "./pages/OrganizationPage"
 import { Header } from "./components/Header"
 import { Footer } from "./components/Footer"
-import { NavBar } from "./components/NavBar"
+import NavBar from "./components/NavBar"
 
 function App() {
   const [employeeList, setEmployeeList] = useState<any[]>([])
 
   useEffect(() => {
-    employeeRepository.getEmployees().then(setEmployeeList)
+    employeeRepository.getEmployees().then(data => setEmployeeList(data.employees))
   }, [])
 
   return (
