@@ -4,8 +4,11 @@ import { employeeService } from "../services/employeeService"
 export const employeeController = {
   async getEmployees(req: Request, res: Response) {
     try {
-      const employees = await employeeService.getEmployees()
-      res.json(employees)
+      const page = Number(req.query.page) || 1
+      const limit = Number(req.query.limit) || 50
+
+      const result = await employeeService.getEmployees(page, limit)
+      res.json(result)
     } catch (error: any) {
       res.status(500).json({ message: error.message })
     }
@@ -22,8 +25,8 @@ export const employeeController = {
 
   async createEmployee(req: Request, res: Response) {
     try {
-      const employees = await employeeService.createEmployee(req.body)
-      res.status(201).json(employees)
+      const newEmployee = await employeeService.createEmployee(req.body)
+      res.status(201).json(newEmployee)
     } catch (error: any) {
       res.status(400).json({ message: error.message })
     }

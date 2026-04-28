@@ -1,9 +1,3 @@
 export function Footer() {
-  const year = new Date().getFullYear()
-
-  return (
-    <footer>
-      <p>Copyright Pixell River Financial {year}</p>
-    </footer>
-  )
+  return <footer>© 2026 Pixell River Financial</footer>;
 }

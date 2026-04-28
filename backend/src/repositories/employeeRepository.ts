@@ -3,10 +3,24 @@ import { PrismaClient } from "@prisma/client"
 const prisma = new PrismaClient()
 
 export const employeeRepository = {
-  async getEmployees() {
-    return prisma.employee.findMany({
-      include: { role: true }
+  async getEmployees(page = 1, limit = 5) {
+    const skip = (page - 1) * limit
+
+    const employees = await prisma.employee.findMany({
+      skip,
+      take: limit,
+      orderBy: { id: "asc" }
     })
+
+    const total = await prisma.employee.count()
+
+    return {
+      employees,
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit)
+    }
   },
 
   async createEmployee(data: {
@@ -14,27 +28,20 @@ export const employeeRepository = {
     lastName: string
     department: string
   }) {
-    const role = await prisma.role.findFirst({
-      where: { name: data.department }
-    })
-
-    if (!role) throw new Error("Invalid department")
-
-    const employee = await prisma.employee.create({
+    return prisma.employee.create({
       data: {
-        firstName: data.firstName,
-        lastName: data.lastName,
-        roleId: role.id
+        firstName: data.firstName.trim(),
+        lastName: data.lastName.trim(),
+        department: data.department.trim()
       }
-    })
-
-    return prisma.employee.findMany({
-      include: { role: true }
     })
   },
 
   async getDepartments() {
-    const roles = await prisma.role.findMany()
-    return roles.map(r => r.name)
+    const roles = await prisma.role.findMany({
+      orderBy: { name: "asc" }
+    })
+
+    return roles.map(role => role.name)
   }
 }

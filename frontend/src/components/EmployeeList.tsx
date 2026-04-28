@@ -1,32 +1,29 @@
+type Employee = {
+  id?: number
+  firstName: string
+  lastName: string
+  department?: string
+  role?: {
+    name: string
+  }
+}
+
 type Props = {
-  employees: {
-    firstName: string
-    lastName: string
-    department: string
-  }[]
+  employees: Employee[]
 }
 
 export function EmployeeList({ employees }: Props) {
-  const departments = Array.from(
-    new Set(employees.map(emp => emp.department))
-  )
+  if (employees.length === 0) {
+    return <p>No employees found.</p>
+  }
 
   return (
-    <main>
-      {departments.map(dept => (
-        <section key={dept}>
-          <h2>{dept}</h2>
-          <ul>
-            {employees
-              .filter(emp => emp.department === dept)
-              .map((emp, index) => (
-                <li key={index}>
-                  {emp.firstName} {emp.lastName}
-                </li>
-              ))}
-          </ul>
-        </section>
+    <ul>
+      {employees.map((emp, index) => (
+        <li key={emp.id ?? index}>
+          {emp.firstName} {emp.lastName} - {emp.department ?? emp.role?.name}
+        </li>
       ))}
-    </main>
+    </ul>
   )
 }

@@ -1,6 +1,6 @@
 import { useState } from "react"
 
-export function useFormInput(initialValue: string) {
+export function useFormInput(initialValue = "") {
   const [value, setValue] = useState(initialValue)
   const [error, setError] = useState("")
 
@@ -17,7 +17,13 @@ export function useFormInput(initialValue: string) {
       return false
     }
 
+    setError("")
     return true
+  }
+
+  function reset() {
+    setValue(initialValue)
+    setError("")
   }
 
   return {
@@ -25,6 +31,8 @@ export function useFormInput(initialValue: string) {
     error,
     onChange: handleChange,
     validate,
-    setValue
+    setValue,
+    setError,
+    reset
   }
 }

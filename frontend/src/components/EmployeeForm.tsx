@@ -1,96 +1,62 @@
-import { useState, useEffect } from "react"
-import { useFormInput } from "../hooks/useFormInput"
-import { employeeRepository } from "../repositories/employeeRepository"
+import { useEffect, useState } from "react"
 import { SignedIn, SignedOut, SignInButton, useAuth } from "@clerk/clerk-react"
+import { useQueryClient } from "@tanstack/react-query"
+import { employeeRepo } from "../repositories/employeeRepo"
 
-type Props = {
-  setEmployees: (employees: any[]) => void
-}
-
-export function EmployeeForm({ setEmployees }: Props) {
-  const firstName = useFormInput("")
-  const lastName = useFormInput("")
-  const department = useFormInput("")
-  const [formError, setFormError] = useState("")
+export function EmployeeForm() {
+  const [firstName, setFirstName] = useState("")
+  const [lastName, setLastName] = useState("")
+  const [department, setDepartment] = useState("")
   const [departments, setDepartments] = useState<string[]>([])
+  const [message, setMessage] = useState("")
 
   const { getToken } = useAuth()
+  const queryClient = useQueryClient()
 
   useEffect(() => {
-    employeeRepository.getDepartments().then(setDepartments)
+    employeeRepo.getDepartments().then(setDepartments)
   }, [])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setFormError("")
+    setMessage("")
 
     try {
       const token = await getToken()
 
-      const res = await fetch("http://localhost:3000/api/employees", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          firstName: firstName.value,
-          lastName: lastName.value,
-          department: department.value
-        })
-      })
+      await employeeRepo.createEmployee(
+        { firstName, lastName, department },
+        token || ""
+      )
 
-      if (!res.ok) {
-        const text = await res.text()
-        throw new Error(text)
-      }
-
-      const employees = await res.json()
-      setEmployees(employees)
-
-      firstName.setValue("")
-      lastName.setValue("")
-      department.setValue("")
-    } catch (error: any) {
-      setFormError(error.message)
+      await queryClient.refetchQueries({ queryKey: ["employees"] })
+      
+      setFirstName("")
+      setLastName("")
+      setDepartment("")
+      setMessage("Employee added successfully.")
+    } catch {
+      setMessage("Unable to add employee.")
     }
   }
 
   return (
     <>
       <SignedOut>
-        <p>
-          Please <SignInButton mode="modal">login</SignInButton> to add employees
-        </p>
+        <p>Please <SignInButton mode="modal">login</SignInButton> to add employees.</p>
       </SignedOut>
 
       <SignedIn>
         <form onSubmit={handleSubmit}>
           <h3>Add Employee</h3>
+          {message && <p>{message}</p>}
 
-          {formError && <p style={{ color: "red" }}>{formError}</p>}
+          <input placeholder="First Name" value={firstName} onChange={e => setFirstName(e.target.value)} />
+          <input placeholder="Last Name" value={lastName} onChange={e => setLastName(e.target.value)} />
 
-          <input
-            type="text"
-            placeholder="First Name"
-            value={firstName.value}
-            onChange={firstName.onChange}
-          />
-
-          <input
-            type="text"
-            placeholder="Last Name"
-            value={lastName.value}
-            onChange={lastName.onChange}
-          />
-
-          <select value={department.value} onChange={department.onChange}>
+          <select value={department} onChange={e => setDepartment(e.target.value)}>
             <option value="">Select Department</option>
-            {departments.map(dep => (
-              <option key={dep} value={dep}>
-                {dep}
-              </option>
-            ))}
+            {departments.map(d => <option key={d} value={d}>{d}</option>)}
           </select>
 
           <button type="submit">Add Employee</button>
