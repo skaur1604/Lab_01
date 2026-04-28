@@ -1,25 +1,31 @@
 import { organizationRepo } from "../repositories/organizationRepository"
 
+type RoleInput = {
+  name: string
+}
+
 export const organizationService = {
-  createRole(data: {
-    firstName: string
-    lastName: string
-    role: string
-  }) {
-    if (data.firstName.trim().length < 3) {
-      return { success: false, message: "First name must be at least 3 characters." }
+  async createRole(data: RoleInput) {
+    const cleanedName = data.name.trim()
+
+    if (cleanedName.length < 2) {
+      return {
+        success: false,
+        message: "Role name must be at least 2 characters."
+      }
     }
 
-    const existing = organizationRepo
-      .getRoles()
-      .find(r => r.role === data.role)
+    const roles = await organizationRepo.getRoles()
 
-    if (existing) {
-      return { success: false, message: "This role is already occupied." }
+    if (roles.includes(cleanedName)) {
+      return {
+        success: false,
+        message: "This role already exists."
+      }
     }
 
-    const updated = organizationRepo.createRole(data)
-
-    return { success: true, roles: updated }
+    return {
+      success: true
+    }
   }
 }

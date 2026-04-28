@@ -1,25 +1,36 @@
-import { useState, useEffect } from "react"
-import { organizationRepo } from "../repositories/organizationRepository"
+import { useQuery } from "@tanstack/react-query"
+import { organizationRepo } from "../repositories/organizationRepo"
 import { OrganizationForm } from "../components/OrganizationForm"
 
-export function OrganizationPage() {
-  const [roles, setRoles] = useState<string[]>([])
+type Role = {
+  id: number
+  name: string
+}
 
-  useEffect(() => {
-    organizationRepo.getDepartments().then(setRoles)
-  }, [])
+export function OrganizationPage() {
+  const {
+    data: roles = [],
+    isLoading,
+    isError
+  } = useQuery({
+    queryKey: ["roles"],
+    queryFn: organizationRepo.getRoles
+  })
+
+  if (isLoading) return <p>Loading organization roles...</p>
+  if (isError) return <p>Roles could not be loaded.</p>
 
   return (
     <>
+      <h2>Organization</h2>
+
       <ul>
-        {roles.map((r, index) => (
-          <li key={index}>
-            {r}
-          </li>
+        {roles.map((role: Role) => (
+          <li key={role.id}>{role.name}</li>
         ))}
       </ul>
 
-      <OrganizationForm setRoles={setRoles} />
+      <OrganizationForm />
     </>
   )
 }

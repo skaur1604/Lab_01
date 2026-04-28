@@ -1,65 +1,48 @@
 import { useState } from "react"
-import { organizationRepo } from "../repositories/organizationRepository"
-import { SignedIn, SignedOut, SignInButton } from "@clerk/clerk-react"
+import { SignedIn, SignedOut, SignInButton, useAuth } from "@clerk/clerk-react"
+import { useQueryClient } from "@tanstack/react-query"
+import { organizationRepo } from "../repositories/organizationRepo"
 
-type Props = {
-  setRoles: (roles: string[]) => void
-}
-
-export function OrganizationForm({ setRoles }: Props) {
+export function OrganizationForm() {
   const [roleName, setRoleName] = useState("")
-  const [formError, setFormError] = useState("")
+  const [message, setMessage] = useState("")
+
+  const { getToken } = useAuth()
+  const queryClient = useQueryClient()
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setFormError("")
-
-    if (!roleName || roleName.trim().length < 2) {
-      setFormError("Role name must be at least 2 characters")
-      return
-    }
+    setMessage("")
 
     try {
-      // assuming backend POST /api/roles exists
-      const res = await fetch("http://localhost:3000/api/roles", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ name: roleName })
-      })
+      const token = await getToken()
 
-      const data = await res.json()
+      await organizationRepo.createRole({ name: roleName.trim() }, token || "")
 
-      // reload roles from backend
-      const roles = await organizationRepo.getDepartments()
-      setRoles(roles)
+      await queryClient.invalidateQueries({ queryKey: ["roles"] })
 
       setRoleName("")
-    } catch (error: any) {
-      setFormError(error.message)
+      setMessage("Role added successfully.")
+    } catch {
+      setMessage("Unable to add role.")
     }
   }
 
   return (
     <>
       <SignedOut>
-        <p>
-          Please <SignInButton mode="modal">login</SignInButton> to add roles
-        </p>
+        <p>Please <SignInButton mode="modal">login</SignInButton> to add roles.</p>
       </SignedOut>
 
       <SignedIn>
         <form onSubmit={handleSubmit}>
           <h3>Add Role</h3>
-
-          {formError && <p style={{ color: "red" }}>{formError}</p>}
+          {message && <p>{message}</p>}
 
           <input
-            type="text"
             placeholder="Role Name"
             value={roleName}
-            onChange={(e) => setRoleName(e.target.value)}
+            onChange={e => setRoleName(e.target.value)}
           />
 
           <button type="submit">Add Role</button>
